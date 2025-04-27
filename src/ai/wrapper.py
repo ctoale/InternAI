@@ -5,12 +5,10 @@ import json
 import os
 import asyncio
 
-# Add the parent directory (src) to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)  # This should be the 'src' directory
+parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
-# Now we can import from server
 from server.ai_service import AIService
 
 async def async_main():

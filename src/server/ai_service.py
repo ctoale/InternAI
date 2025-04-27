@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 import openai
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 class AIService:
@@ -16,10 +15,8 @@ class AIService:
     """
 
     def __init__(self):
-        # Initialize API key from environment variable
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
         
-        # Set up OpenAI client
         self.openai_client = openai.OpenAI(api_key=self.openai_api_key)
         
         # Maximum token count for GPT-3.5-Turbo
@@ -36,13 +33,10 @@ class AIService:
             Dict[str, Any]: Complete trip itinerary
         """
         try:
-            # Create a structured prompt for the AI based on trip data
             prompt = self._create_trip_plan_prompt(trip_data)
             
-            # Get AI response with trip plan
             ai_response = await self._get_ai_response(prompt)
             
-            # Parse the AI response to extract JSON
             itinerary = self._parse_ai_response(ai_response)
             
             return itinerary
@@ -63,8 +57,6 @@ class AIService:
             Dict[str, Any]: Updated trip itinerary
         """
         try:
-            # Here you would typically retrieve the existing trip from a database
-            # For now, we'll assume modifications contains all necessary trip data
             if not modifications:
                 raise ValueError("Modifications are required for trip regeneration")
             
@@ -86,13 +78,10 @@ class AIService:
             Dict[str, Any]: The daily itinerary for the specified day
         """
         try:
-            # Create a prompt for generating just the specified day's itinerary
             prompt = self._create_day_itinerary_prompt(trip_data, day_number)
             
-            # Get AI response with day plan
             ai_response = await self._get_ai_response(prompt)
             
-            # Parse the AI response to extract JSON
             day_itinerary = self._parse_ai_response(ai_response)
             
             return day_itinerary
@@ -112,13 +101,10 @@ class AIService:
             Dict[str, Any]: Travel recommendations in structured format
         """
         try:
-            # Create a prompt for the AI based on the query
             prompt = self._create_recommendations_prompt(query)
             
-            # Get AI response with recommendations
             ai_response = await self._get_ai_response(prompt)
             
-            # Parse the AI response to extract JSON
             recommendations = self._parse_ai_response(ai_response)
             
             return recommendations
@@ -138,7 +124,6 @@ class AIService:
             str: The AI response
         """
         try:
-            # Use the new OpenAI client API format (v1.0.0+)
             response = await asyncio.to_thread(
                 self.openai_client.chat.completions.create,
                 model="gpt-3.5-turbo",
@@ -150,7 +135,6 @@ class AIService:
                 temperature=0.7
             )
             
-            # Access content from the new format
             return response.choices[0].message.content
             
         except Exception as e:
@@ -168,7 +152,6 @@ class AIService:
             Dict[str, Any]: Parsed JSON data
         """
         try:
-            # Extract JSON from the response (handles cases where AI might include explanatory text)
             json_start = response.find('{')
             json_end = response.rfind('}') + 1
             
@@ -176,12 +159,10 @@ class AIService:
                 json_str = response[json_start:json_end]
                 return json.loads(json_str)
             
-            # If no JSON format detected, try to parse the entire response
             return json.loads(response)
             
         except json.JSONDecodeError:
             print(f"Error parsing AI response: {response[:100]}...")
-            # Return a minimal valid structure if parsing fails
             return {
                 "flights": [],
                 "accommodations": [],
@@ -218,10 +199,8 @@ class AIService:
         departure_location = trip_data.get("departureLocation", "")
         number_of_travelers = trip_data.get("travelers", 1) or trip_data.get("numberOfTravelers", 1)
         
-        # Get additional destinations
         additional_destinations = trip_data.get("destinations", [])
         
-        # Find the earliest start date and latest end date considering all destinations
         earliest_start = None
         latest_end = None
         
@@ -230,7 +209,6 @@ class AIService:
                 earliest_start = datetime.fromisoformat(start_date.replace('Z', '+00:00')) if 'Z' in start_date else datetime.fromisoformat(start_date)
                 latest_end = datetime.fromisoformat(end_date.replace('Z', '+00:00')) if 'Z' in end_date else datetime.fromisoformat(end_date)
                 
-                # Check additional destinations for earlier start or later end dates
                 for dest in additional_destinations:
                     dest_start = dest.get("startDate", "")
                     dest_end = dest.get("endDate", "")
@@ -247,17 +225,14 @@ class AIService:
             except:
                 pass
         
-        # Calculate trip duration
         trip_duration = "unknown duration"
         if earliest_start and latest_end:
             days = (latest_end - earliest_start).days + 1
             trip_duration = f"{days} days"
             
-            # Update start_date and end_date to use the full trip duration
             start_date = earliest_start.isoformat()
             end_date = latest_end.isoformat()
         
-        # Extract preferences
         preferences = trip_data.get("preferences", {})
         accommodation_type = preferences.get("accommodationType", "Any")
         transportation_type = preferences.get("transportationType", "Any")
@@ -265,7 +240,6 @@ class AIService:
         dietary_restrictions = ", ".join(preferences.get("dietaryRestrictions", []))
         places_to_visit = ", ".join(preferences.get("placesToVisit", []))
         
-        # Format additional destinations for the prompt
         additional_destinations_text = ""
         if additional_destinations:
             additional_destinations_text = "\n\n## Additional Destinations\n"
@@ -280,7 +254,6 @@ class AIService:
                 if dest_places:
                     additional_destinations_text += f"  - Places to Visit: {dest_places}\n"
         
-        # Build the prompt
         prompt = f"""
 # TRAVEL ITINERARY GENERATION REQUEST
 
@@ -419,7 +392,6 @@ You MUST provide a complete travel itinerary in valid JSON format matching the f
         start_date = trip_data.get("startDate", "")
         budget = trip_data.get("budget", 0)
         
-        # Calculate the date for the specific day
         specific_date = ""
         try:
             start = datetime.fromisoformat(start_date.replace('Z', '+00:00')) if 'Z' in start_date else datetime.fromisoformat(start_date)
@@ -428,18 +400,15 @@ You MUST provide a complete travel itinerary in valid JSON format matching the f
         except:
             specific_date = "Unknown Date"
         
-        # Extract preferences
         preferences = trip_data.get("preferences", {})
         transportation_type = preferences.get("transportationType", "Any")
         activities = ", ".join(preferences.get("activities", []))
         dietary_restrictions = ", ".join(preferences.get("dietaryRestrictions", []))
         places_to_visit = ", ".join(preferences.get("placesToVisit", []))
         
-        # Handle additional destinations
         destinations = trip_data.get("destinations", [])
         current_destination = destination
         
-        # Check if this day falls into an additional destination's date range
         for dest in destinations:
             dest_start = dest.get("startDate", "")
             dest_end = dest.get("endDate", "")
@@ -457,11 +426,9 @@ You MUST provide a complete travel itinerary in valid JSON format matching the f
                 except:
                     pass
         
-        # Get existing days' activities to avoid duplication
         existing_activities = []
         existing_restaurants = []
         
-        # Process existing days from the input
         if "existingDays" in trip_data and trip_data["existingDays"]:
             for day in trip_data["existingDays"]:
                 if "activities" in day and day["activities"]:
@@ -476,11 +443,9 @@ You MUST provide a complete travel itinerary in valid JSON format matching the f
                         if "restaurant" in meal and meal["restaurant"]:
                             existing_restaurants.append(meal["restaurant"])
         
-        # Format existing activities and restaurants for the prompt
         existing_activities_str = ", ".join(existing_activities) if existing_activities else "None"
         existing_restaurants_str = ", ".join(existing_restaurants) if existing_restaurants else "None"
         
-        # Build the prompt
         prompt = f"""
 # DAILY ITINERARY GENERATION REQUEST
 

@@ -7,18 +7,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 async def migrate_trips():
-    # Connect to MongoDB
     client = AsyncIOMotorClient(os.getenv('MONGODB_URI'))
     db = client[os.getenv('MONGODB_DB_NAME')]
     trips_collection = db.trips
 
-    # Get all trips
     trips = await trips_collection.find({}).to_list(length=None)
     print(f"Found {len(trips)} trips to migrate")
 
     for trip in trips:
         try:
-            # Create new itinerary structure if it doesn't exist
             if 'itinerary' not in trip:
                 trip['itinerary'] = {
                     'flights': [],
@@ -40,7 +37,6 @@ async def migrate_trips():
                     }
                 }
 
-            # Convert old itinerary structure to new format if it exists
             if 'itinerary' in trip and isinstance(trip['itinerary'], dict):
                 old_itinerary = trip['itinerary']
                 new_itinerary = {
@@ -63,7 +59,6 @@ async def migrate_trips():
                     }
                 }
 
-                # Convert flights
                 if 'flights' in old_itinerary:
                     for flight in old_itinerary['flights']:
                         new_flight = {
@@ -76,7 +71,6 @@ async def migrate_trips():
                         new_itinerary['flights'].append(new_flight)
                         new_itinerary['totalCost']['flights'] += flight.get('price', 0)
 
-                # Convert accommodations
                 if 'accommodations' in old_itinerary:
                     for acc in old_itinerary['accommodations']:
                         new_acc = {
@@ -90,7 +84,6 @@ async def migrate_trips():
                         new_itinerary['accommodations'].append(new_acc)
                         new_itinerary['totalCost']['accommodation'] += acc.get('price', 0)
 
-                # Convert activities to daily itinerary
                 if 'activities' in old_itinerary:
                     activities_by_date = {}
                     for activity in old_itinerary['activities']:
@@ -109,7 +102,6 @@ async def migrate_trips():
                         activities_by_date[date].append(new_activity)
                         new_itinerary['totalCost']['activities'] += activity.get('price', 0)
 
-                    # Create daily itinerary entries
                     for date, activities in activities_by_date.items():
                         day_entry = {
                             'day': len(new_itinerary['dailyItinerary']) + 1,
@@ -120,7 +112,6 @@ async def migrate_trips():
                         }
                         new_itinerary['dailyItinerary'].append(day_entry)
 
-                # Convert transportation
                 if 'transportation' in old_itinerary:
                     for transport in old_itinerary['transportation']:
                         new_transport = {
@@ -129,7 +120,6 @@ async def migrate_trips():
                             'cost': transport.get('price', 0),
                             'duration': transport.get('duration', '')
                         }
-                        # Add to appropriate day in dailyItinerary
                         date = transport.get('departureTime', datetime.now()).strftime('%Y-%m-%d')
                         for day in new_itinerary['dailyItinerary']:
                             if day['date'] == date:
@@ -137,7 +127,6 @@ async def migrate_trips():
                                 break
                         new_itinerary['totalCost']['transportation'] += transport.get('price', 0)
 
-                # Update total cost
                 new_itinerary['totalCost']['total'] = (
                     new_itinerary['totalCost']['flights'] +
                     new_itinerary['totalCost']['accommodation'] +
@@ -148,7 +137,6 @@ async def migrate_trips():
 
                 trip['itinerary'] = new_itinerary
 
-            # Update the trip in the database
             await trips_collection.update_one(
                 {'_id': trip['_id']},
                 {'$set': trip}

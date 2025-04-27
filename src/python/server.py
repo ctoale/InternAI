@@ -5,24 +5,27 @@ from typing import List, Dict, Optional
 from datetime import date
 import sys
 import os
+import importlib.util
 
-# Add the parent directory to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# Use an absolute import instead of relative import
-from server.ai_service import AIService
+src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(src_dir)
+
+ai_service_path = os.path.join(src_dir, 'server', 'ai_service.py')
+spec = importlib.util.spec_from_file_location("ai_service", ai_service_path)
+ai_service_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(ai_service_module)
+AIService = ai_service_module.AIService
 
 app = FastAPI()
 
-# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize AI service
 ai_service = AIService()
 
 class TripPreferences(BaseModel):
@@ -48,10 +51,8 @@ async def generate_travel_plan(request: TripPreferencesRequest):
         print(f"[Python Backend] Received request to generate travel plan")
         preferences = request.tripPreferences
         
-        # Convert the request to a query string for our AI service
         query = f"Plan a trip to {preferences.get('destination', 'Unknown')} for "
         
-        # Add duration if available
         if preferences.get('startDate') and preferences.get('endDate'):
             from datetime import datetime
             start = datetime.fromisoformat(preferences['startDate'].replace('Z', '+00:00')) if 'Z' in preferences['startDate'] else datetime.fromisoformat(preferences['startDate'])
@@ -59,25 +60,20 @@ async def generate_travel_plan(request: TripPreferencesRequest):
             days = (end - start).days + 1
             query += f"{days} days "
         
-        # Add dietary restrictions if any
         if preferences.get('preferences', {}).get('dietaryRestrictions'):
             dietary = ", ".join(preferences['preferences']['dietaryRestrictions'])
             query += f"with {dietary} dietary requirements "
         
-        # Add activities if any
         if preferences.get('preferences', {}).get('activities'):
             activities = ", ".join(preferences['preferences']['activities'])
             query += f"including {activities} activities"
         
         print(f"[Python Backend] Calling AI service with query: {query}")
         
-        # Call the AI service with the constructed query
         recommendations = await ai_service.get_travel_recommendations(query)
         
         print(f"[Python Backend] Received recommendations from AI service")
         
-        # Format the recommendations into the expected structure
-        # The Node.js expects an itinerary with flights, accommodations, dailyItinerary, etc.
         formatted_response = {
             "flights": [],
             "accommodations": [],
@@ -98,7 +94,6 @@ async def generate_travel_plan(request: TripPreferencesRequest):
             }
         }
         
-        # Extract flights, accommodations, activities from recommendations
         for rec in recommendations:
             rec_type = rec.get("type")
             content = rec.get("content", {})
@@ -114,7 +109,6 @@ async def generate_travel_plan(request: TripPreferencesRequest):
                     "amenities": content.get("highlights", [])
                 })
             elif rec_type == "itinerary":
-                # Add to daily itinerary
                 formatted_response["dailyItinerary"].append({
                     "day": content.get("day", 0),
                     "date": content.get("date", ""),
@@ -149,7 +143,6 @@ async def generate_travel_plan(request: TripPreferencesRequest):
             elif rec_type == "tips":
                 formatted_response["additionalInfo"]["localCustoms"] = content.get("tips", [])
         
-        # Return the formatted response
         return formatted_response
     except Exception as e:
         print(f"[Python Backend] Error generating travel plan: {str(e)}")

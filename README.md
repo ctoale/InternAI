@@ -1,6 +1,6 @@
 # ItinerAI
 
-An AI-powered travel planning platform that generates personalized trip itineraries based on user preferences. The application combines a Node.js backend, Python AI service, and React frontend to deliver a seamless travel planning experience.
+An AI-powered travel planning platform that generates personalized trip itineraries based on user preferences. The application combines a Node.js backend, Python AI service, PostgreSQL (Prisma) and MongoDB database support, and React frontend to deliver a seamless travel planning experience.
 
 ## Features
 
@@ -39,7 +39,7 @@ An AI-powered travel planning platform that generates personalized trip itinerar
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/itinerai.git
+git clone https://github.com/ctoale/itinerai.git
 cd itinerai
 ```
 
