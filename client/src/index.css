@@ -1,0 +1,221 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #1976d2;
+  --primary-light: #4dabf5;
+  --primary-dark: #1565c0;
+  --secondary-color: #f50057;
+  --secondary-light: #ff4081;
+  --secondary-dark: #c51162;
+  --text-primary: #2c3e50;
+  --text-secondary: #546e7a;
+  --bg-light: #f8f9fa;
+  --bg-white: #ffffff;
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --navbar-height: 64px;
+  --scrollbar-width: 10px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-primary);
+  background-color: var(--bg-light);
+  
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background-image: url('./maldives-island-background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  filter: saturate(1.1) brightness(0.95);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(
+    135deg, 
+    rgba(25, 118, 210, 0.1) 0%, 
+    rgba(30, 60, 114, 0.2) 50%,
+    rgba(21, 101, 192, 0.1) 100%
+  );
+  background-attachment: fixed;
+}
+
+.MuiPopover-root,
+.MuiMenu-root,
+.MuiDrawer-root {
+  position: absolute !important;
+}
+
+.MuiBackdrop-root {
+  position: absolute !important;
+}
+
+.MuiPopover-root .MuiPaper-root,
+.MuiMenu-root .MuiPaper-root {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.main-content {
+  min-height: 100vh;
+  position: relative;
+}
+
+.main-content > div:not([class^="Home"]) {
+  padding-top: var(--navbar-height);
+}
+
+.content-container {
+  position: relative;
+}
+
+.content-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.15' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1.5'/%3E%3Ccircle cx='13' cy='13' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: -1;
+}
+
+.MuiPaper-root {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  display: block;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+.MuiModal-root,
+.MuiPopover-root,
+.MuiMenu-root,
+.MuiDrawer-root {
+  overflow-y: auto;
+  position: absolute;
+}
+
+.MuiMenu-paper,
+.MuiPopover-paper {
+  transform-origin: top center !important;
+  position: absolute !important;
+  margin-top: 2px !important;
+}
+
+.MuiBackdrop-root {
+  position: absolute !important;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color var(--transition-speed) ease;
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
