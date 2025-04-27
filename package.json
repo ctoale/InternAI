@@ -4,9 +4,10 @@
   "description": "AI-powered travel planning application",
   "main": "src/server/index.ts",
   "scripts": {
-    "start": "ts-node src/server/index.ts",
+    "start": "node dist/server/index.js",
     "dev": "nodemon src/server/index.ts",
     "build": "tsc",
+    "build:server": "tsc -p tsconfig.server.json",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test": "jest",
@@ -40,5 +41,8 @@
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
