@@ -4,7 +4,12 @@ import './index.css';
 import App from './App';
 import axios from 'axios';
 
-axios.defaults.baseURL = 'http://localhost:3001';
+const apiBaseUrl = process.env.NODE_ENV === 'production' 
+  ? '/api' 
+  : 'http://localhost:3001';
+
+console.log('Using API base URL:', apiBaseUrl);
+axios.defaults.baseURL = apiBaseUrl;
 
 axios.interceptors.request.use(
   (config) => {

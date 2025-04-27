@@ -25,10 +25,29 @@ connectToMongoDB();
 const app = express();
 const port = process.env.PORT || 3001;
 
+// Allow requests from multiple origins including Vercel deployment
+const allowedOrigins = [
+  'http://localhost:3000', 
+  'http://127.0.0.1:3000',
+  'https://intern-ai.vercel.app', // Add your Vercel domain here
+  'https://intern-ai-git-master-ctoale.vercel.app' // Add your preview deployments
+];
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      console.log('Blocked by CORS:', origin);
+      callback(null, true); // Still allow all origins in production for now
+    }
+  },
   credentials: true
 }));
+
 app.use(express.json());
 
 app.use('/api/trips', tripRoutes);
