@@ -53,7 +53,14 @@ cd ..
 
 3. Install Python dependencies:
 ```bash
-pip install -r requirements.txt
+# For macOS/Linux:
+python3 -m pip install -r requirements.txt
+
+# For Windows:
+# Option 1:
+python -m pip install -r requirements.txt
+# Option 2:
+py -m pip install -r requirements.txt
 ```
 
 4. Create a `.env` file in the root directory with the following variables:
