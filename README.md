@@ -2,7 +2,7 @@
 
 An AI-powered travel planning platform that generates personalized trip itineraries based on user preferences. The application combines a Node.js backend, Python AI service, PostgreSQL (Prisma) and MongoDB database support, and React frontend to deliver a seamless travel planning experience.
 Demo video located here:
-https://drive.google.com/file/d/1eIDumQBTTbahUFHnzUARO__6JCCkg6lQ/view
+https://youtu.be/eMln9N8gXHw
 
 ## Features
 
